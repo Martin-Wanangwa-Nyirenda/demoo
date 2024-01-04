@@ -31,7 +31,7 @@ defmodule DemooWeb.SessionController do
   def delete(conn, _params) do
     conn
     |> configure_session(drop: true)
-    |> redirect(to: "")
+    |> redirect(to: "/session/new")
   end
 
 end

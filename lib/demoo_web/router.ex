@@ -21,6 +21,7 @@ defmodule DemooWeb.Router do
     resources "/user", UserController
     resources "/movie", MovieController
     resources "/session", SessionController, only: [:create, :new]
+    get "/signout", SessionController, :delete
   end
 
   # Other scopes may use custom stacks.
