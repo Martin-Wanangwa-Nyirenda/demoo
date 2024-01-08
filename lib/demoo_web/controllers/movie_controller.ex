@@ -1,6 +1,7 @@
 defmodule DemooWeb.MovieController do
   use DemooWeb, :controller
 
+  alias DemooWeb.Helpers.Auth
   alias Demoo.Movies
   alias Demoo.Movies.Movie
   alias Demoo.Accounts
@@ -8,15 +9,18 @@ defmodule DemooWeb.MovieController do
   plug :authenticate_user when action in [:index, :create, :new, :show, :edit, :delete]
 
   defp authenticate_user(conn, _) do
-
-    if Plug.Conn.get_session(conn) == %{} do
+    if Auth.signed_in?(conn) do
       conn
-        |> put_flash(:error, "You must be logged in to access this page.")
-        |> redirect(to: "/session/new")
-        |> halt()
     else
-      conn
+      conn |> redirect_to_signin()
     end
+  end
+
+  defp redirect_to_signin(conn) do
+    conn
+      |> put_flash(:error, "You must be logged in to access this page.")
+      |> redirect(to: "/session/new")
+      |> halt()
   end
 
   def index(conn, _params) do

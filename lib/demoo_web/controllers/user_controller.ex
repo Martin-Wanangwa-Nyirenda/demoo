@@ -3,19 +3,23 @@ defmodule DemooWeb.UserController do
 
   alias Demoo.Accounts
   alias Demoo.Accounts.User
+  alias DemooWeb.Helpers.Auth
 
-  plug :authenticate_user when action in [:create, :new]
+  plug :authenticate_user when action in [:create, :new, :index]
 
   defp authenticate_user(conn, _) do
-
-    if Plug.Conn.get_session(conn) == %{} do
+    if Auth.signed_in?(conn) do
       conn
-        |> put_flash(:error, "You must be logged in to access this page.")
-        |> redirect(to: "/session/new")
-        |> halt()
     else
-      conn
+      conn |> redirect_to_signin()
     end
+  end
+
+  defp redirect_to_signin(conn) do
+    conn
+      |> put_flash(:error, "You must be logged in to access this page.")
+      |> redirect(to: "/session/new")
+      |> halt()
   end
 
   def index(conn, _params) do
@@ -30,10 +34,10 @@ defmodule DemooWeb.UserController do
 
   def create(conn, %{"user" => user_params}) do
     case Accounts.create_user(user_params) do
-      {:ok} ->
+      {:ok, _user} ->
         conn
         |> put_flash(:info, "User created successfully.")
-        |> redirect(to: ~p"/movie")
+        |> redirect(to: ~p"/session/new")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, :new, changeset: changeset)
